@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": "prayforothers",
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "inline": true,
+        "entry": "splash.html"
+      }      
+    }
+  },
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "Generate Prayer Report",
+        "description": "prayforothers",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/post-create"
+      }
+      
+    ]
+  },  
+  "triggers": {
+    "onAppInstall": "/internal/triggers/on-app-install",
+    "onCommentCreate": "/internal/triggers/on-comment-create"
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build"
+  },
+  "dev": {
+    "subreddit": "prayforothers_dev"
+  }
+}
