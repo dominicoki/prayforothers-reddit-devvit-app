@@ -1,10 +1,15 @@
-import { context, reddit } from '@devvit/web/server';
+import { context, reddit, redis } from '@devvit/web/server';
 
 const DAYS_TO_SEARCH = 30;
 const MAX_POSTS_TO_SCAN = 1000;
 const REPORT_TITLE_PREFIX = 'Unanswered Posts Report';
+const REPORT_REDIS_PREFIX = 'prayer-reports';
 
 const SOURCE_SUBREDDIT = 'PrayerRequests';
+
+const getReportRedisKey = (subredditName: string): string => {
+  return `${REPORT_REDIS_PREFIX}:${subredditName.toLowerCase()}`;
+};
 
 export const createPost = async () => {
   const reportSubreddit = context.subredditName;
@@ -88,9 +93,99 @@ export const createPost = async () => {
     `Report posted in: r/${reportSubreddit}`
   );
 
-  return await reddit.submitPost({
+  const reportPost = await reddit.submitPost({
     subredditName: reportSubreddit,
     title: `${REPORT_TITLE_PREFIX} (${unansweredPosts.length})`,
     text: reportLines.join('\n'),
   });
+
+  /*
+   * Store the report post ID so only posts created by this app
+   * can be deleted through the cleanup menu action.
+   */
+  const redisKey = getReportRedisKey(reportSubreddit);
+
+  await redis.hSet(redisKey, {
+    [reportPost.id]: new Date().toISOString(),
+  });
+
+  console.log(
+    `Stored report post ${reportPost.id} in Redis key ${redisKey}.`
+  );
+
+  return reportPost;
+};
+
+export const deleteAllPrayerReports = async (): Promise<{
+  deleted: number;
+  unavailable: number;
+  failed: number;
+}> => {
+  const reportSubreddit = context.subredditName;
+
+  if (!reportSubreddit) {
+    throw new Error('The current subreddit name is unavailable.');
+  }
+
+  const redisKey = getReportRedisKey(reportSubreddit);
+  const reportIds = await redis.hKeys(redisKey);
+
+  let deleted = 0;
+  let unavailable = 0;
+  let failed = 0;
+
+  for (const reportId of reportIds) {
+    /*
+     * getPostById requires a Reddit post ID beginning with t3_.
+     */
+    if (!reportId.startsWith('t3_')) {
+      console.warn(`Skipping invalid stored report ID: ${reportId}`);
+
+      await redis.hDel(redisKey, [reportId]);
+      unavailable += 1;
+      continue;
+    }
+
+    try {
+      const reportPost = await reddit.getPostById(
+        reportId as `t3_${string}`
+      );
+
+      /*
+       * Extra safety check. Only delete posts that still have
+       * the report title prefix used by this app.
+       */
+      if (!reportPost.title.startsWith(REPORT_TITLE_PREFIX)) {
+        console.warn(
+          `Skipping ${reportId} because its title is not a prayer report.`
+        );
+
+        await redis.hDel(redisKey, [reportId]);
+        unavailable += 1;
+        continue;
+      }
+
+      await reportPost.delete();
+      await redis.hDel(redisKey, [reportId]);
+
+      deleted += 1;
+
+      console.log(`Deleted prayer report ${reportId}.`);
+    } catch (error) {
+      console.error(`Failed to delete prayer report ${reportId}:`, error);
+
+      /*
+       * The post may already have been deleted manually. Remove its
+       * tracking entry so future cleanup attempts do not retry it.
+       */
+      await redis.hDel(redisKey, [reportId]);
+      failed += 1;
+    }
+  }
+
+  return {
+    deleted,
+    unavailable,
+    failed,
+  };
 };

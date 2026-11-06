@@ -1,13 +1,13 @@
 # PrayForOthers
 
-A Devvit application that helps support prayer communities on Reddit.
+A Devvit application that helps prayer communities identify unanswered prayer requests and provides interactive community bot features.
 
-Built using:
+Built with:
 
 - Devvit Web
-- React
 - TypeScript
 - Hono
+- React
 - Tailwind CSS
 
 ---
@@ -16,31 +16,28 @@ Built using:
 
 ## 1. Prayer Report Generator
 
-Generates a report of unanswered prayer posts.
+Generates a report of unanswered prayer requests from:
 
-When a moderator selects:
+```text
+r/PrayerRequests
+```
+
+The report:
+
+- Searches the previous 30 days
+- Finds posts with zero comments
+- Sorts them by age
+- Creates a report post in the subreddit where the app is installed
+
+Moderator Menu:
 
 ```text
 Generate Prayer Report
 ```
 
-the app will:
-
-1. Search `r/PrayerRequests`
-2. Look at posts created within the last 30 days
-3. Find posts with zero comments
-4. Generate a report
-5. Post the report into the subreddit where the app is installed
-
-Example:
-
-```text
-Unanswered Posts Report (42)
-```
-
 ---
 
-## 2. Amen Auto-Reply
+## 2. Amen Auto Reply
 
 When a user comments:
 
@@ -54,11 +51,12 @@ the bot automatically replies:
 Amen
 ```
 
-The bot:
+Features:
 
-- ignores its own comments
-- replies only once per Reddit post
-- prevents reply loops
+- Case-insensitive matching
+- Ignores the bot's own comments
+- Prevents infinite loops
+- Responds only once per Reddit post
 
 Example:
 
@@ -74,19 +72,21 @@ Amen
 
 ## 3. Dynamic Item Requests
 
-Users can request an item by mentioning the bot:
+A user can request an item by mentioning the bot.
+
+Example:
 
 ```text
 u/prayforothers please give me a coffee
 ```
 
-The bot responds:
+Response:
 
 ```text
 Hey u/ExampleUser, here is your coffee.
 ```
 
-Examples:
+Additional examples:
 
 ```text
 u/prayforothers please give me a cookie
@@ -120,22 +120,81 @@ Hey u/ExampleUser, here is your giant purple dragon.
 
 ---
 
+## 4. Delete All Prayer Reports
+
+Deletes prayer reports created by the app.
+
+Moderator Menu:
+
+```text
+Delete All Prayer Reports
+```
+
+Features:
+
+- Tracks report posts created by the app
+- Deletes only tracked report posts
+- Does not affect normal subreddit content
+- Cleans up old report posts in bulk
+
+Example:
+
+```text
+Delete All Prayer Reports
+```
+
+↓
+
+```text
+Deleted 5 prayer reports.
+```
+
+---
+
+# Moderator Menu
+
+The app currently provides:
+
+```text
+Generate Prayer Report
+
+Delete All Prayer Reports
+```
+
+---
+
 # Development
 
 ## Requirements
 
-- Node.js 24+
+- Node.js 22 or later
 - Devvit CLI
-- Reddit account
-- Reddit Developer account
+- Reddit Developer Account
+- Git
 
-Install Devvit:
+---
+
+# Installation
+
+Clone the repository:
 
 ```bash
-npm install -g devvit
+git clone https://github.com/dominicoki/prayforothers-reddit-devvit-app.git
 ```
 
-Login:
+Enter the project:
+
+```bash
+cd prayforothers-reddit-devvit-app
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Login to Devvit:
 
 ```bash
 devvit login
@@ -143,21 +202,21 @@ devvit login
 
 ---
 
-# Running Locally
+# Running in Playtest Mode
 
-Start playtest mode:
+Start local development:
 
 ```bash
 npm run dev
 ```
 
-This uploads the current build and launches a Reddit playtest version.
+This uploads a playtest version to Reddit.
 
 ---
 
 # Type Checking
 
-Run TypeScript validation:
+Validate TypeScript:
 
 ```bash
 npm run test:types
@@ -167,7 +226,7 @@ npm run test:types
 
 # Build
 
-Build the application:
+Build the project:
 
 ```bash
 npm run build
@@ -177,7 +236,7 @@ npm run build
 
 # Deploy
 
-Upload a new version:
+Upload a new app version:
 
 ```bash
 npm run deploy
@@ -192,34 +251,6 @@ Publish the application:
 ```bash
 npm run launch
 ```
-
----
-
-# Test Subreddit
-
-Current development subreddit:
-
-```text
-r/prayforothers_dev
-```
-
----
-
-# Menu Actions
-
-Moderator Menu:
-
-```text
-Generate Prayer Report
-```
-
-Creates a report of unanswered posts from:
-
-```text
-r/PrayerRequests
-```
-
-and posts the report into the installed subreddit.
 
 ---
 
@@ -245,3 +276,22 @@ src
 └── shared
     └── api.ts
 ```
+
+---
+
+# Current Version
+
+## v1.1
+
+Features included:
+
+- Prayer Report Generator
+- Amen Auto Reply
+- Dynamic Item Requests
+- Delete All Prayer Reports
+
+---
+
+# License
+
+Personal project for Reddit community support and prayer outreach.

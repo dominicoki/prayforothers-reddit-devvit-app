@@ -7,7 +7,7 @@
       "default": {
         "inline": true,
         "entry": "splash.html"
-      }      
+      }
     }
   },
   "server": {
@@ -18,14 +18,20 @@
     "items": [
       {
         "label": "Generate Prayer Report",
-        "description": "prayforothers",
+        "description": "Find unanswered posts from r/PrayerRequests",
         "location": "subreddit",
         "forUserType": "moderator",
         "endpoint": "/internal/menu/post-create"
+      },
+      {
+        "label": "Delete All Prayer Reports",
+        "description": "Delete tracked prayer reports created by this app",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/delete-reports"
       }
-      
     ]
-  },  
+  },
   "triggers": {
     "onAppInstall": "/internal/triggers/on-app-install",
     "onCommentCreate": "/internal/triggers/on-comment-create"
